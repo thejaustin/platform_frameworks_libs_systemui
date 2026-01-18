@@ -444,7 +444,7 @@ public class ClockDrawableWrapper extends CustomAdaptiveIconDrawable implements 
         protected void updateFilter() {
             super.updateFilter();
             boolean isDisabled = isDisabled();
-            int alpha = isDisabled ? (int) (disabledAlpha * FULLY_OPAQUE) : FULLY_OPAQUE;
+            int alpha = isDisabled ? (int) (disabledAlpha * FastBitmapDrawable.FULLY_OPAQUE) : FastBitmapDrawable.FULLY_OPAQUE;
             setAlpha(alpha);
             mBgPaint.setColorFilter(isDisabled ? getDisabledColorFilter() : mBgFilter);
             mFG.setColorFilter(isDisabled ? getDisabledColorFilter() : null);
