@@ -362,10 +362,11 @@ public class BaseIconFactory implements AutoCloseable {
             return null;
         }
         boolean isFromIconPack = ExtendedBitmapDrawable.isFromIconPack(icon);
-        boolean shrinkNonAdaptiveIcons = !isFromIconPack && IconPreferencesKt.shouldWrapAdaptive(mContext);
+        boolean shouldWrap = IconPreferencesKt.shouldWrapAdaptive(mContext);
+        boolean shrinkNonAdaptiveIcons = shouldWrap && !(icon instanceof AdaptiveIconDrawable);
         float scale;
         
-        if (shrinkNonAdaptiveIcons && !(icon instanceof AdaptiveIconDrawable)) {
+        if (shrinkNonAdaptiveIcons) {
             scale = new IconNormalizer(mIconBitmapSize).getScale(icon);
             
             int wrapperBackgroundColor = IconPreferencesKt.getWrapperBackgroundColor(mContext, icon);
