@@ -52,7 +52,7 @@ class MonoIconThemeController(
 
     override val themeID = "with-theme"
 
-    // Lawnchair-TODO: CustomAdaptiveIconDrawable
+    // AutoCat-TODO: CustomAdaptiveIconDrawable
     override fun createThemedBitmap(
         icon: AdaptiveIconDrawable,
         info: BitmapInfo,

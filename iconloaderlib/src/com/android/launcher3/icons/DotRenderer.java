@@ -44,14 +44,14 @@ public class DotRenderer {
     // The dot size is defined as a percentage of the app icon size.
     private static final float SIZE_PERCENTAGE = 0.228f;
     
-    // Lawnchair
+    // AutoCat
     private static final float SIZE_PERCENTAGE_WITH_COUNT = 0.348f;
     private static final int MAX_COUNT = 99; // The max number to draw on dots
 
     private final float mCircleRadius;
     private final Paint mCirclePaint = new Paint(ANTI_ALIAS_FLAG | FILTER_BITMAP_FLAG);
 
-    // Lawnchair
+    // AutoCat
     private final Paint mTextPaint = new Paint(ANTI_ALIAS_FLAG | FILTER_BITMAP_FLAG);
 
     private final Bitmap mBackgroundWithShadow;
@@ -63,7 +63,7 @@ public class DotRenderer {
 
     private boolean mDisplayCount;
     
-    // Lawnchair
+    // AutoCat
     @ColorInt
     private int mColor;
     @ColorInt
@@ -73,7 +73,7 @@ public class DotRenderer {
     private static final int MIN_DOT_SIZE = 1;
     
     /**
-     * AOSP's dot renderer with Lawnchair related change to show notification count on a dot.
+     * AOSP's dot renderer with AutoCat related change to show notification count on a dot.
      *
      * @param iconSizePx
      * @param iconShapePath
