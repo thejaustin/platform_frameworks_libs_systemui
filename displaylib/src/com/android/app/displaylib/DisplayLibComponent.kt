@@ -18,11 +18,6 @@ package com.android.app.displaylib
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.view.IWindowManager
-import dagger.Binds
-import dagger.BindsInstance
-import dagger.Component
-import dagger.Module
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
@@ -30,21 +25,17 @@ import kotlinx.coroutines.CoroutineScope
  * Component that creates all classes in displaylib.
  *
  * Each user of this library will bind the required element in the factory constructor. It's advised
- * to use this component through [createDisplayLibComponent], which wraps the dagger generated
- * method.
+ * to use this component through [createDisplayLibComponent], which wraps the creation method.
  */
-@Component(modules = [DisplayLibModule::class])
-@Singleton
 interface DisplayLibComponent {
 
-    @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance displayManager: DisplayManager,
-            @BindsInstance windowManager: IWindowManager,
-            @BindsInstance bgHandler: Handler,
-            @BindsInstance bgApplicationScope: CoroutineScope,
-            @BindsInstance backgroundCoroutineDispatcher: CoroutineDispatcher,
+            displayManager: DisplayManager,
+            windowManager: IWindowManager,
+            bgHandler: Handler,
+            bgApplicationScope: CoroutineScope,
+            backgroundCoroutineDispatcher: CoroutineDispatcher,
         ): DisplayLibComponent
     }
 
@@ -53,18 +44,8 @@ interface DisplayLibComponent {
     val displaysWithDecorationsRepositoryCompat: DisplaysWithDecorationsRepositoryCompat
 }
 
-@Module
-interface DisplayLibModule {
-    @Binds fun bindDisplayManagerImpl(impl: DisplayRepositoryImpl): DisplayRepository
-
-    @Binds
-    fun bindDisplaysWithDecorationsRepositoryImpl(
-        impl: DisplaysWithDecorationsRepositoryImpl
-    ): DisplaysWithDecorationsRepository
-}
-
 /**
- * Just a wrapper to make the generated code to create the component more explicit.
+ * Just a wrapper to make component creation explicit.
  *
  * This should be called only once per process. Note that [bgHandler], [bgApplicationScope] and
  * [backgroundCoroutineDispatcher] are expected to be backed by background threads. In the future
@@ -77,12 +58,11 @@ fun createDisplayLibComponent(
     bgApplicationScope: CoroutineScope,
     backgroundCoroutineDispatcher: CoroutineDispatcher,
 ): DisplayLibComponent {
-    return DaggerDisplayLibComponent.factory()
-        .create(
-            displayManager,
-            windowManager,
-            bgHandler,
-            bgApplicationScope,
-            backgroundCoroutineDispatcher,
-        )
+    return DisplayLibComponentImpl(
+        displayManager,
+        windowManager,
+        bgHandler,
+        bgApplicationScope,
+        backgroundCoroutineDispatcher,
+    )
 }

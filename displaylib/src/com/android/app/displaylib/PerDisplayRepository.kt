@@ -19,12 +19,8 @@ package com.android.app.displaylib
 import android.util.Log
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
-import javax.inject.Qualifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -36,27 +32,6 @@ import kotlinx.coroutines.launch
  *
  * This is useful for resources or objects that need to be managed independently for each connected
  * display (e.g., UI state, rendering contexts, or display-specific configurations).
- *
- * Note that in most cases this can be implemented by a simple `@AssistedFactory` with `displayId`
- * parameter
- *
- * ```kotlin
- * class SomeType @AssistedInject constructor(@Assisted displayId: Int,..)
- *      @AssistedFactory
- *      interface Factory {
- *         fun create(displayId: Int): SomeType
- *      }
- *  }
- * ```
- *
- * Then it can be used to create a [PerDisplayRepository] as follows:
- * ```kotlin
- * // Injected:
- * val repositoryFactory: PerDisplayRepositoryImpl.Factory
- * val instanceFactory: PerDisplayRepositoryImpl.Factory
- * // repository creation:
- * repositoryFactory.create(instanceFactory::create)
- * ```
  *
  * @see PerDisplayRepository For how to retrieve and manage instances created by this factory.
  */
@@ -77,20 +52,18 @@ interface PerDisplayInstanceProviderWithTeardown<T> : PerDisplayInstanceProvider
 }
 
 /**
- * Provides access to per-display instances of type `T`.
- *
- * Acts as a repository, managing the caching and retrieval of instances created by a
- * [PerDisplayInstanceProvider]. It ensures that only one instance of `T` exists per display ID.
- */
-/**
  * Callback to run when a given [PerDisplayRepository] is initialized.
- *
- * Extracted to top level to avoid Dagger KSP bug with nested interface import generation.
  */
 fun interface PerDisplayRepositoryInitCallback {
     fun onInit(debugName: String, instance: Any)
 }
 
+/**
+ * Provides access to per-display instances of type `T`.
+ *
+ * Acts as a repository, managing the caching and retrieval of instances created by a
+ * [PerDisplayInstanceProvider]. It ensures that only one instance of `T` exists per display ID.
+ */
 interface PerDisplayRepository<T> {
     /** Gets the cached instance or create a new one for a given display. */
     operator fun get(displayId: Int): T?
@@ -108,9 +81,6 @@ interface PerDisplayRepository<T> {
     fun forEach(createIfAbsent: Boolean, action: Consumer<T>)
 }
 
-/** Qualifier for [CoroutineScope] used for displaylib background tasks. */
-@Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class DisplayLibBackground
-
 /**
  * Default implementation of [PerDisplayRepository].
  *
@@ -126,19 +96,14 @@ interface PerDisplayRepository<T> {
  * [DisplayInstanceLifecycleManager] can decide to delete instances for a display even before it is
  * disconnected. An example of usecase for it, is to delete instances when screen decorations are
  * removed.
- *
- * Note that this is a [PerDisplayStoreImpl] 2.0 that doesn't require [CoreStartable] bindings,
- * providing all args in the constructor.
  */
-class PerDisplayInstanceRepositoryImpl<T>
-@AssistedInject
-constructor(
-    @Assisted override val debugName: String,
-    @Assisted private val instanceProvider: PerDisplayInstanceProvider<T>,
-    @Assisted lifecycleManager: DisplayInstanceLifecycleManager? = null,
-    @DisplayLibBackground bgApplicationScope: CoroutineScope,
+class PerDisplayInstanceRepositoryImpl<T>(
+    override val debugName: String,
+    private val instanceProvider: PerDisplayInstanceProvider<T>,
+    private val bgApplicationScope: CoroutineScope,
     private val displayRepository: DisplayRepository,
     private val initCallback: PerDisplayRepositoryInitCallback,
+    private val lifecycleManager: DisplayInstanceLifecycleManager? = null,
 ) : PerDisplayRepository<T> {
 
     private val perDisplayInstances = ConcurrentHashMap<Int, T?>()
@@ -206,12 +171,12 @@ constructor(
         }
     }
 
-    @AssistedFactory
-    interface Factory<T> {
+    /** Factory for creating [PerDisplayInstanceRepositoryImpl] instances. */
+    fun interface Factory<T> {
         fun create(
             debugName: String,
             instanceProvider: PerDisplayInstanceProvider<T>,
-            overrideLifecycleManager: DisplayInstanceLifecycleManager? = null,
+            overrideLifecycleManager: DisplayInstanceLifecycleManager?,
         ): PerDisplayInstanceRepositoryImpl<T>
     }
 
