@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
 import javax.inject.Qualifier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -83,6 +82,15 @@ interface PerDisplayInstanceProviderWithTeardown<T> : PerDisplayInstanceProvider
  * Acts as a repository, managing the caching and retrieval of instances created by a
  * [PerDisplayInstanceProvider]. It ensures that only one instance of `T` exists per display ID.
  */
+/**
+ * Callback to run when a given [PerDisplayRepository] is initialized.
+ *
+ * Extracted to top level to avoid Dagger KSP bug with nested interface import generation.
+ */
+fun interface PerDisplayRepositoryInitCallback {
+    fun onInit(debugName: String, instance: Any)
+}
+
 interface PerDisplayRepository<T> {
     /** Gets the cached instance or create a new one for a given display. */
     operator fun get(displayId: Int): T?
@@ -90,19 +98,8 @@ interface PerDisplayRepository<T> {
     /** Debug name for this repository, mainly for tracing and logging. */
     val debugName: String
 
-    /**
-     * Callback to run when a given repository is initialized.
-     *
-     * This allows the caller to perform custom logic when the repository is ready to be used, e.g.
-     * register to dumpManager.
-     *
-     * Note that the instance is *leaked* outside of this class, so it should only be done when
-     * repository is meant to live as long as the caller. In systemUI this is ok because the
-     * repository lives as long as the process itself.
-     */
-    fun interface InitCallback {
-        fun onInit(debugName: String, instance: Any)
-    }
+    /** @see PerDisplayRepositoryInitCallback */
+    typealias InitCallback = PerDisplayRepositoryInitCallback
 
     /**
      * Iterate over all the available displays performing the action on each object of type T.
@@ -144,7 +141,7 @@ constructor(
     @Assisted lifecycleManager: DisplayInstanceLifecycleManager? = null,
     @DisplayLibBackground bgApplicationScope: CoroutineScope,
     private val displayRepository: DisplayRepository,
-    private val initCallback: PerDisplayRepository.InitCallback,
+    private val initCallback: PerDisplayRepositoryInitCallback,
 ) : PerDisplayRepository<T> {
 
     private val perDisplayInstances = ConcurrentHashMap<Int, T?>()
