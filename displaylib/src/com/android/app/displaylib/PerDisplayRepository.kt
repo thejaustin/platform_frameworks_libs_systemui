@@ -98,9 +98,6 @@ interface PerDisplayRepository<T> {
     /** Debug name for this repository, mainly for tracing and logging. */
     val debugName: String
 
-    /** @see PerDisplayRepositoryInitCallback */
-    typealias InitCallback = PerDisplayRepositoryInitCallback
-
     /**
      * Iterate over all the available displays performing the action on each object of type T.
      *
