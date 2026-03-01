@@ -1,19 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.android.library)
 }
 
 // Lawnchair-TODO-Postmerge: AOSP now uses kts build scripts for this
-
-// LC-Build-TODO: addFrameworkJar() doesn't work, what???
-def frameworkJar = new File("$rootDir/prebuilts/libs", "framework-16.jar")
-tasks.withType(JavaCompile).configureEach {
-    classpath = files(frameworkJar, classpath ?: project.files())
-}
-tasks.withType(KotlinCompile).configureEach {
-    libraries.from(files(frameworkJar))
-}
+// LC-Build-TODO: addFrameworkJar() now handles classpath globally via projectsEvaluated
 
 android {
     namespace "com.android.launcher3.icons"
@@ -32,4 +22,3 @@ dependencies {
     implementation libs.androidx.palette.ktx
     compileOnly projects.flags
 }
-apply plugin: 'kotlin-android'

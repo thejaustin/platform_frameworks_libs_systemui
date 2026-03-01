@@ -1,21 +1,12 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.android.library)
 }
 
-// LC-Build-TODO: addFrameworkJar() doesn't work, what???
-def frameworkJar = new File("$rootDir/prebuilts/libs", "framework-16.jar")
-tasks.withType(JavaCompile).configureEach {
-    classpath = files(frameworkJar, classpath ?: project.files())
-}
-tasks.withType(KotlinCompile).configureEach {
-    libraries.from(files(frameworkJar))
-}
+// LC-Build-TODO: addFrameworkJar() now handles classpath globally via projectsEvaluated
 
 android {
-    namespace = "com.google.android.msdl"
-    testNamespace = "com.google.android.msdl.tests"
+    namespace = "com.android.app.msdl"
+    testNamespace = "com.android.app.msdl.tests"
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -24,27 +15,21 @@ android {
         main {
             java.srcDirs = ['src']
             kotlin.directories.add('src')
+            res.srcDirs = ['res']
             manifest.srcFile 'AndroidManifest.xml'
         }
-//        androidTest {
-//            java.srcDirs = ["tests/src"]
-//            manifest.srcFile 'tests/AndroidManifest.xml'
-//        }
+        androidTest {
+            java.srcDirs = ["tests"]
+            manifest.srcFile "tests/AndroidManifest.xml"
+        }
     }
     lint {
         abortOnError false
-    }
-    tasks.lint.enabled = false
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
 }
 
 addFrameworkJar('framework-16.jar')
 
 dependencies {
-    implementation libs.kotlin.stdlib.jdk7
-    implementation libs.androidx.core.animation
     implementation libs.androidx.core.ktx
 }
-apply plugin: 'kotlin-android'
