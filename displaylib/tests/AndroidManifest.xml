@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.app.displaylib">
+   >
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:label="Tests for DisplayLib"

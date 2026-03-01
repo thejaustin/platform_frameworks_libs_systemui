@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.msdl.tests">
+   >
 
     <instrumentation
         android:name="android.testing.TestableInstrumentation"
