@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    id "org.jetbrains.kotlin.android"
 }
 
 // Lawnchair-TODO-Postmerge: AOSP now uses kts build scripts for this
