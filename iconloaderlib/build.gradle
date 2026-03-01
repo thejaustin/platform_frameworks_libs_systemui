@@ -9,7 +9,7 @@ plugins {
 // LC-Build-TODO: addFrameworkJar() doesn't work, what???
 def frameworkJar = new File("$rootDir/prebuilts/libs", "framework-16.jar")
 tasks.withType(JavaCompile).configureEach {
-    classpath = files(frameworkJar) + classpath
+    classpath = files(frameworkJar, classpath ?: project.files())
 }
 tasks.withType(KotlinCompile).configureEach {
     libraries.from(files(frameworkJar))
@@ -32,3 +32,4 @@ dependencies {
     implementation libs.androidx.palette.ktx
     compileOnly projects.flags
 }
+apply plugin: 'kotlin-android'
